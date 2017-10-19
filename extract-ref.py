@@ -2,13 +2,13 @@
 
 from sys import stdin
 
-show = false
+show = False
 
 for line in stdin:
-    if line.startsWith("not ok"):
+    if line.startswith("not ok"):
         show = True
-    if line.startsWith("ok"):
+    if line.startswith("ok"):
         show = False
 
     if show:
-        print line
+        print line.strip('\n')
