@@ -1,23 +1,31 @@
 module Main where
 
-import           Lib
-import qualified System.IO.Streams as S
-import           System.IO.Streams.Handle (stdin, stdout)
+import Control.Monad (when)
+import Data.List (isPrefixOf)
+import System.IO (getLine, isEOF)
+import System.Exit (exitSuccess)
 
 main :: IO ()
-main = do
-  startDelim <- getArg "--start"
-  endDelim <- getArg "--end"
-  keepDelims <- argPresent "--keepDelims"
-  stream <- S.read stdin
+main = extract "not ok" "ok"
 
-  let sPred = delimPredicate keepDelims <$> startDelim
-  let ePred = delimPredicate keepDelims <$> endDelim
+extract :: String -> String -> IO ()
+extract delim undelim = do
+  end <- isEOF
+  if end then
+    exitSuccess
+  else do
+    line <- getLine
+    when (delim `isPrefixOf` line) $
+      putStrLn line >> extract' undelim delim
 
-  S.write (extract <$> sPred <*> ePred <*> stream) stdout
-
-getArg :: String -> IO (Maybe String)
-getArg = undefined
-
-argPresent :: String -> IO Bool
-argPresent = undefined
+extract' :: String -> String -> IO ()
+extract' undelim delim = do
+  end <- isEOF
+  if end then
+    exitSuccess
+  else do
+    line <- getLine
+    if delim `isPrefixOf` line then
+      extract undelim delim
+    else
+      putStrLn line
