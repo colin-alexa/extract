@@ -6,26 +6,21 @@ import System.IO (getLine, isEOF)
 import System.Exit (exitSuccess)
 
 main :: IO ()
-main = extract "not ok" "ok"
+main = do
+  keptLines <- takeSome ("not ok" `isPrefixOf`) ("ok" `isPrefixOf`) <$> sequence getLines
+  mapM_ putStrLn keptLines
 
-extract :: String -> String -> IO ()
-extract delim undelim = do
-  end <- isEOF
-  if end then
-    exitSuccess
-  else do
-    line <- getLine
-    when (delim `isPrefixOf` line) $
-      putStrLn line >> extract' undelim delim
+takeSome _ _ []     = []
+takeSome dPred uPred (x:xs) =
+  if uPred x
+    then dropSome dPred uPred xs
+    else x : takeSome dPred uPred xs
 
-extract' :: String -> String -> IO ()
-extract' undelim delim = do
-  end <- isEOF
-  if end then
-    exitSuccess
-  else do
-    line <- getLine
-    if delim `isPrefixOf` line then
-      extract undelim delim
-    else
-      putStrLn line
+dropSome _ _ []     = []
+dropSome dPred uPred (x:xs) =
+  if dPred x
+    then x : takeSome dPred uPred xs
+    else dropSome dPred uPred xs
+
+getLines :: [IO String]
+getLines = getLine : getLines
