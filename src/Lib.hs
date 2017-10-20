@@ -1,16 +1,30 @@
 module Lib
-    ( extract
-    , delimPredicate
+    ( takeSomeIO
+    , dropSomeIO
     ) where
 
-import           Data.ByteString (ByteString)
-import           Data.Attoparsec.ByteString (takeWhile)
-import           System.IO.Streams
-
-type SPred = ByteString -> Bool
-extract :: SPred -> SPred -> ByteString -> ByteString
-extract = undefined
+import Data.List (isPrefixOf)
+import System.IO (getLine, isEOF)
 
 
-delimPredicate :: Bool -> String -> SPred
-delimPredicate b = undefined
+takeSomeIO :: (String -> Bool) -> (String -> Bool) -> IO ()
+takeSomeIO takePred dropPred = do
+  end <- isEOF
+  if end
+    then return ()
+    else do
+      line <- getLine
+      if dropPred line
+        then dropSomeIO takePred dropPred
+        else putStrLn line >> takeSomeIO takePred dropPred
+
+dropSomeIO :: (String -> Bool) -> (String -> Bool) -> IO ()
+dropSomeIO takePred dropPred = do
+  end <- isEOF
+  if end
+    then return ()
+    else do
+      line <- getLine
+      if takePred line
+        then putStrLn line >> takeSomeIO takePred dropPred
+        else dropSomeIO takePred dropPred

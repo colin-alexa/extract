@@ -1,26 +1,17 @@
 module Main where
 
-import Control.Monad (when)
+import Lib
+import System.Environment (getArgs)
+import System.Exit (exitFailure)
 import Data.List (isPrefixOf)
-import System.IO (getLine, isEOF)
-import System.Exit (exitSuccess)
 
 main :: IO ()
 main = do
-  keptLines <- takeSome ("not ok" `isPrefixOf`) ("ok" `isPrefixOf`) <$> sequence getLines
-  mapM_ putStrLn keptLines
+  [showDelim, hideDelim] <- getArgs >>= parseArgs
+  dropSomeIO (showDelim `isPrefixOf`) (hideDelim `isPrefixOf`)
 
-takeSome _ _ []     = []
-takeSome dPred uPred (x:xs) =
-  if uPred x
-    then dropSome dPred uPred xs
-    else x : takeSome dPred uPred xs
-
-dropSome _ _ []     = []
-dropSome dPred uPred (x:xs) =
-  if dPred x
-    then x : takeSome dPred uPred xs
-    else dropSome dPred uPred xs
-
-getLines :: [IO String]
-getLines = getLine : getLines
+parseArgs ("--help":_) = putStrLn "extract <show-delim> <hide-delim>" >> exitFailure
+parseArgs ("-h":_)     = parseArgs ["--help"]
+parseArgs []           = parseArgs ["--help"]
+parseArgs (x:y:z:_)    = parseArgs ["--help"]
+parseArgs xs = return xs
