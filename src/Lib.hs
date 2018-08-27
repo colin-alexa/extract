@@ -3,7 +3,6 @@ module Lib
     , dropSomeIO
     ) where
 
-import Data.List (isPrefixOf)
 import System.IO (getLine, isEOF)
 
 
